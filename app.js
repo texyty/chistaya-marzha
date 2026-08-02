@@ -43,11 +43,15 @@ function calculate() {
     : margin < 10
       ? 'Прибыль есть, но запас прочности небольшой.'
       : 'Экономика товара выглядит положительно.';
+
+  const savedValues = Object.fromEntries(new FormData(form).entries());
+  localStorage.setItem('chistaya-marzha-values', JSON.stringify(savedValues));
 }
 
 form.addEventListener('input', calculate);
 document.querySelector('#reset-button').addEventListener('click', () => {
   form.reset();
+  localStorage.removeItem('chistaya-marzha-values');
   calculate();
 });
 document.querySelector('#copy-button').addEventListener('click', async (event) => {
@@ -65,5 +69,15 @@ document.querySelector('#copy-button').addEventListener('click', async (event) =
     event.currentTarget.textContent = 'Не удалось скопировать';
   }
 });
+
+try {
+  const savedValues = JSON.parse(localStorage.getItem('chistaya-marzha-values'));
+  if (savedValues) {
+    Object.entries(savedValues).forEach(([name, savedValue]) => {
+      const field = form.elements.namedItem(name);
+      if (field) field.value = savedValue;
+    });
+  }
+} catch { localStorage.removeItem('chistaya-marzha-values'); }
 
 calculate();

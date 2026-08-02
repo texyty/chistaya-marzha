@@ -49,12 +49,28 @@ input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(31, 113, 70
 .cards article { background: var(--card); padding: 26px; min-height: 160px; }
 .cards b { font-size: 18px; }
 .cards p { color: var(--muted); line-height: 1.55; }
+.marketplaces, .faq { padding: 0 0 110px; }
+.platform-links { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.platform-links a { display: flex; min-height: 150px; flex-direction: column; justify-content: space-between; padding: 25px; border: 1px solid var(--line); background: var(--card); color: var(--ink); text-decoration: none; transition: transform .18s ease, border-color .18s ease; }
+.platform-links a:hover { transform: translateY(-3px); border-color: var(--green); }
+.platform-links b { font-size: 21px; }
+.platform-links span { color: var(--muted); font-size: 14px; }
+.faq details { border-top: 1px solid var(--line); padding: 21px 0; }
+.faq details:last-child { border-bottom: 1px solid var(--line); }
+.faq summary { cursor: pointer; font-size: 18px; font-weight: 750; }
+.faq details p { max-width: 760px; color: var(--muted); line-height: 1.6; }
+.platform-page { max-width: 820px; padding: 90px 0 120px; }
+.platform-page h1 { font-size: clamp(42px, 7vw, 76px); }
+.platform-page h2 { margin-top: 55px; }
+.platform-page p, .platform-page li { color: var(--muted); font-size: 17px; line-height: 1.7; }
+.platform-page .primary { margin: 20px 0; }
 footer { display: flex; justify-content: space-between; gap: 20px; padding: 28px 0 40px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
 @media (max-width: 820px) {
   .hero { padding-top: 64px; }
   .calculator { grid-template-columns: 1fr; }
   .result { position: static; }
   .cards { grid-template-columns: 1fr 1fr; }
+  .platform-links { grid-template-columns: 1fr; }
 }
 @media (max-width: 520px) {
   .topbar, main, footer { width: min(100% - 24px, 1160px); }
