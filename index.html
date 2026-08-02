@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Бесплатный калькулятор чистой прибыли продавца маркетплейса: комиссия, логистика, реклама, налог и возвраты.">
+  <title>Чистая маржа — калькулятор прибыли маркетплейса</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#">чистая<span>маржа</span></a>
+    <a class="ghost-link" href="#calculator">Рассчитать прибыль</a>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow">Бесплатно · без регистрации · данные не отправляются</div>
+      <h1>Узнайте, сколько вы <em>действительно</em> зарабатываете с продажи</h1>
+      <p>Комиссия, логистика, реклама, налог и возвраты — в одном понятном расчёте.</p>
+      <a class="primary" href="#calculator">Посчитать за 2 минуты</a>
+    </section>
+
+    <section class="calculator" id="calculator">
+      <form class="panel" id="profit-form">
+        <div class="panel-heading">
+          <div>
+            <span class="step">01</span>
+            <h2>Данные товара</h2>
+          </div>
+          <button class="text-button" id="reset-button" type="button">Сбросить</button>
+        </div>
+
+        <div class="fields">
+          <label>Цена продажи, ₽<input name="price" type="number" min="0" step="1" value="1990" required></label>
+          <label>Себестоимость, ₽<input name="cost" type="number" min="0" step="1" value="650" required></label>
+          <label>Комиссия площадки, %<input name="commission" type="number" min="0" max="100" step="0.1" value="23"></label>
+          <label>Логистика, ₽<input name="logistics" type="number" min="0" step="1" value="180"></label>
+          <label>Упаковка и обработка, ₽<input name="handling" type="number" min="0" step="1" value="45"></label>
+          <label>Реклама с одной продажи, ₽<input name="ads" type="number" min="0" step="1" value="210"></label>
+          <label>Налог с выручки, %<input name="tax" type="number" min="0" max="100" step="0.1" value="6"></label>
+          <label>Выкуп заказов, %<input name="buyout" type="number" min="1" max="100" step="1" value="85"></label>
+          <label>Стоимость обратной логистики, ₽<input name="returnLogistics" type="number" min="0" step="1" value="100"></label>
+          <label>Прочие расходы, ₽<input name="other" type="number" min="0" step="1" value="0"></label>
+        </div>
+        <p class="hint">Берите проценты и тарифы из кабинета своего маркетплейса — так расчёт будет точнее.</p>
+      </form>
+
+      <aside class="result panel" aria-live="polite">
+        <span class="step">02</span>
+        <h2>Результат</h2>
+        <div class="profit-card positive" id="profit-card">
+          <span>Чистая прибыль с продажи</span>
+          <strong id="profit">—</strong>
+          <small id="verdict">—</small>
+        </div>
+        <dl class="metrics">
+          <div><dt>Маржинальность</dt><dd id="margin">—</dd></div>
+          <div><dt>Расходы всего</dt><dd id="expenses">—</dd></div>
+          <div><dt>Цена безубыточности</dt><dd id="break-even">—</dd></div>
+          <div><dt>Макс. реклама в ноль</dt><dd id="max-ads">—</dd></div>
+          <div><dt>Прибыль со 100 продаж</dt><dd id="profit-100">—</dd></div>
+        </dl>
+        <button class="secondary" id="copy-button" type="button">Скопировать результат</button>
+        <p class="microcopy">Расчёт является ориентировочным и не заменяет бухгалтерский учёт.</p>
+      </aside>
+    </section>
+
+    <section class="explanation">
+      <span class="step">03</span>
+      <h2>Что учитывает калькулятор</h2>
+      <div class="cards">
+        <article><b>Площадка</b><p>Комиссию, прямую и обратную логистику.</p></article>
+        <article><b>Продвижение</b><p>Среднюю стоимость рекламы на один выкупленный заказ.</p></article>
+        <article><b>Государство</b><p>Налог, рассчитанный как процент от выручки.</p></article>
+        <article><b>Возвраты</b><p>Дополнительные расходы с учётом процента выкупа.</p></article>
+      </div>
+    </section>
+  </main>
+
+  <footer><span>© 2026 чистаямаржа</span><span>Сделано для разумных решений, а не красивых оборотов.</span></footer>
+  <script src="app.js"></script>
+</body>
+</html>
