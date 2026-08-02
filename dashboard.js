@@ -14,6 +14,7 @@ const products=[
 ];
 const expenseParts=[['Комиссия площадки',190314],['Логистика и обработка',112870],['Продвижение',89400],['Себестоимость',251325],['Налоги',49647],['Возвраты и прочее',6214]];
 let currentPeriod=30;
+let currentSearch='';
 
 function savedCosts(){try{return JSON.parse(localStorage.getItem('dashboard-costs'))||{}}catch{return{}}}
 function adjustedProducts(){const costs=savedCosts();return products.map(p=>{const cost=Number(costs[p.sku]??p.unitCost);const delta=(cost-p.unitCost)*p.orders;return{...p,currentCost:cost,expenses:p.expenses+delta,profit:p.profit-delta}})}
@@ -29,6 +30,8 @@ function render(period=30){
   document.querySelector('#orders').textContent=number.format(d.orders);
   document.querySelector('#returns').textContent=`Возвратов: ${d.returns}`;
   renderChart(period,d.revenue,adjustedProfit);
+  renderGoal(adjustedProfit,period);
+  renderFunnel(period);
 }
 function renderChart(days,revenue,profit){
   const points=days===7?7:days===14?14:15;
@@ -42,12 +45,31 @@ function renderExpenses(){
   document.querySelector('#expense-total').textContent=rub.format(total);
   document.querySelector('#expense-list').innerHTML=parts.map(([name,value])=>`<div class="expense-row"><div class="expense-meta"><span>${name}</span><b>${rub.format(value)}</b></div><div class="track"><div class="fill" style="width:${value/total*100}%"></div></div></div>`).join('');
 }
-function renderProducts(query=''){
-  const rows=adjustedProducts().filter(p=>`${p.name} ${p.sku}`.toLowerCase().includes(query.toLowerCase()));
+function renderProducts(query=currentSearch){
+  currentSearch=query;
+  const riskOnly=document.querySelector('#risk-only')?.checked;
+  const rows=adjustedProducts().filter(p=>`${p.name} ${p.sku}`.toLowerCase().includes(query.toLowerCase())).filter(p=>!riskOnly||p.profit/p.revenue*100<15);
   document.querySelector('#product-table').innerHTML=rows.map(p=>{const margin=p.profit/p.revenue*100;const state=margin>=15?['Прибыльный','']:margin>=8?['Требует внимания','warn']:['В зоне риска','bad'];return `<tr><td class="product-cell"><b>${p.name}</b><small>${p.sku}</small></td><td>${p.orders}</td><td>${rub.format(p.revenue)}</td><td>${rub.format(p.expenses)}</td><td class="${p.profit>=0?'positive':'negative'}">${rub.format(p.profit)}</td><td>${margin.toFixed(1).replace('.',',')}%</td><td><span class="badge ${state[1]}">${state[0]}</span></td></tr>`}).join('');
+}
+function renderGoal(profit,period){
+  const target=Math.max(1000,Number(localStorage.getItem('dashboard-goal'))||180000);
+  const progress=Math.max(0,Math.min(100,profit/target*100));
+  const forecast=period<30?profit/period*30:profit;
+  document.querySelector('#goal-current').textContent=rub.format(profit);
+  document.querySelector('#goal-target').textContent=rub.format(target);
+  document.querySelector('#goal-fill').style.width=`${progress}%`;
+  document.querySelector('#goal-percent').textContent=`Выполнено ${progress.toFixed(0)}%`;
+  document.querySelector('#goal-remaining').textContent=profit>=target?'Цель достигнута':`Осталось ${rub.format(target-profit)}`;
+  document.querySelector('#forecast-profit').textContent=rub.format(forecast);
+  const status=document.querySelector('#forecast-status');status.textContent=forecast>=target?'План будет выполнен':'Ниже плана';status.className=forecast>=target?'success':'attention';
+}
+function renderFunnel(period){
+  const ratio=period/30;const values=[['Просмотры',48210],['Добавили в корзину',3890],['Оформили заказ',684],['Выкупили',641]];
+  const max=values[0][1];document.querySelector('#funnel').innerHTML=values.map(([name,value],index)=>{const scaled=Math.round(value*ratio);const conversion=index?value/values[index-1][1]*100:100;return `<div><span>${name}<small>${index?conversion.toFixed(1).replace('.',',')+'% переход':'100% трафика'}</small></span><i><b style="width:${Math.max(15,value/max*100)}%"></b></i><strong>${number.format(scaled)}</strong></div>`}).join('');
 }
 document.querySelector('#period').addEventListener('change',e=>render(Number(e.target.value)));
 document.querySelector('#product-search').addEventListener('input',e=>renderProducts(e.target.value));
+document.querySelector('#risk-only').addEventListener('change',()=>renderProducts());
 const costDialog=document.querySelector('#cost-dialog');
 function openCosts(){document.querySelector('#cost-fields').innerHTML=adjustedProducts().map(p=>`<label><span>${p.name}<small>${p.sku}</small></span><input type="number" min="0" step="1" name="${p.sku}" value="${p.currentCost}"><b>₽ / шт.</b></label>`).join('');costDialog.showModal()}
 document.querySelector('#cost-button').addEventListener('click',openCosts);
@@ -55,4 +77,9 @@ document.querySelector('#cost-close').addEventListener('click',()=>costDialog.cl
 document.querySelector('#cost-reset').addEventListener('click',()=>{localStorage.removeItem('dashboard-costs');costDialog.close();render(currentPeriod);renderExpenses();renderProducts()});
 document.querySelector('#cost-save').addEventListener('click',()=>{const values={};document.querySelectorAll('#cost-fields input').forEach(input=>values[input.name]=Math.max(0,Number(input.value)||0));localStorage.setItem('dashboard-costs',JSON.stringify(values));costDialog.close();render(currentPeriod);renderExpenses();renderProducts()});
 document.querySelector('#export-button').addEventListener('click',()=>{const header=['Артикул','Товар','Заказы','Выручка','Расходы','Прибыль','Маржа'];const rows=adjustedProducts().map(p=>[p.sku,p.name,p.orders,p.revenue,Math.round(p.expenses),Math.round(p.profit),(p.profit/p.revenue*100).toFixed(1)]);const csv='\uFEFF'+[header,...rows].map(row=>row.map(cell=>`"${String(cell).replaceAll('"','""')}"`).join(';')).join('\n');const link=document.createElement('a');link.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));link.download='chistaya-marzha-ozon.csv';link.click();URL.revokeObjectURL(link.href)});
+const goalDialog=document.querySelector('#goal-dialog');
+document.querySelector('#goal-edit').addEventListener('click',()=>{document.querySelector('#goal-input').value=Number(localStorage.getItem('dashboard-goal'))||180000;goalDialog.showModal()});
+document.querySelector('#goal-close').addEventListener('click',()=>goalDialog.close());document.querySelector('#goal-cancel').addEventListener('click',()=>goalDialog.close());
+document.querySelector('#goal-save').addEventListener('click',()=>{const value=Math.max(1000,Number(document.querySelector('#goal-input').value)||180000);localStorage.setItem('dashboard-goal',value);goalDialog.close();render(currentPeriod)});
+document.querySelectorAll('.alert-list button').forEach(button=>button.addEventListener('click',()=>{const name=button.dataset.product;document.querySelector('#product-search').value=name;document.querySelector('#risk-only').checked=false;renderProducts(name);document.querySelector('#products').scrollIntoView({behavior:'smooth'})}));
 render();renderExpenses();renderProducts();

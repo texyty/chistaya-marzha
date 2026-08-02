@@ -8,8 +8,8 @@
   <title>Дашборд продавца Ozon — Чистая маржа</title>
   <link rel="canonical" href="https://texyty.github.io/chistaya-marzha/dashboard.html">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="dashboard.css?v=2">
-  <link rel="stylesheet" href="dashboard-overrides.css?v=2">
+  <link rel="stylesheet" href="dashboard.css?v=3">
+  <link rel="stylesheet" href="dashboard-overrides.css?v=3">
 </head>
 <body>
   <aside class="sidebar">
@@ -18,6 +18,7 @@
       <a class="active" href="#overview">Обзор</a>
       <a href="#products">Товары</a>
       <a href="#expenses">Расходы Ozon</a>
+      <a href="#plan">План месяца</a>
       <a href="index.html#calculator">Калькулятор</a>
     </nav>
     <div class="account"><span class="status-dot"></span><div><b>Демо-магазин</b><small>Тестовые данные</small></div></div>
@@ -42,6 +43,30 @@
       <article><span>Заказы</span><strong id="orders">—</strong><small id="returns">—</small></article>
     </section>
 
+    <section class="operations-grid" id="plan">
+      <article class="widget goal-widget">
+        <div class="widget-title"><div><p class="overline">Цель месяца</p><h2>План по чистой прибыли</h2></div><button class="mini-button" id="goal-edit">Изменить цель</button></div>
+        <div class="goal-numbers"><strong id="goal-current">—</strong><span>из <b id="goal-target">—</b></span></div>
+        <div class="goal-track"><i id="goal-fill"></i></div>
+        <div class="goal-footer"><span id="goal-percent">—</span><span id="goal-remaining">—</span></div>
+        <div class="forecast"><span>Прогноз к концу месяца</span><b id="forecast-profit">—</b><small id="forecast-status">—</small></div>
+      </article>
+
+      <article class="widget funnel-widget">
+        <div class="widget-title"><div><p class="overline">Конверсия</p><h2>Воронка заказов</h2></div><span class="period-chip">30 дней</span></div>
+        <div class="funnel" id="funnel"></div>
+      </article>
+
+      <article class="widget alerts-widget">
+        <div class="widget-title"><div><p class="overline">Контроль</p><h2>Что требует действий</h2></div><span class="alert-count">3</span></div>
+        <div class="alert-list">
+          <button data-product="Лампа настольная LED"><i class="high">!</i><span><b>Реклама съедает маржу</b><small>Лампа настольная LED · проверить ставки</small></span><em>→</em></button>
+          <button data-product="Полка настенная"><i class="medium">↓</i><span><b>Маржа ниже целевой</b><small>Полка настенная · текущая маржа 11,9%</small></span><em>→</em></button>
+          <button data-product="Щётка для уборки"><i class="low">◎</i><span><b>Низкая прибыль на заказ</b><small>Щётка для уборки · пересмотреть цену</small></span><em>→</em></button>
+        </div>
+      </article>
+    </section>
+
     <section class="insights" aria-label="Краткие выводы">
       <article class="insight good"><span>↗</span><div><b>Прибыль растёт</b><p>Темп прибыли положительный. Маржа находится выше цели на 1,6 п.п.</p></div></article>
       <article class="insight warn"><span>!</span><div><b>Реклама требует внимания</b><p>Продвижение занимает 10,8% выручки. Проверьте кампании слабых товаров.</p></div></article>
@@ -62,7 +87,7 @@
     </section>
 
     <section class="widget products" id="products">
-      <div class="widget-title"><div><p class="overline">Юнит-экономика</p><h2>Прибыльность товаров</h2></div><div class="table-actions"><button id="cost-button">Настроить себестоимость</button><input id="product-search" type="search" placeholder="Найти товар или артикул"></div></div>
+      <div class="widget-title"><div><p class="overline">Юнит-экономика</p><h2>Прибыльность товаров</h2></div><div class="table-actions"><label class="risk-toggle"><input id="risk-only" type="checkbox"><span>Только риски</span></label><button id="cost-button">Настроить себестоимость</button><input id="product-search" type="search" placeholder="Найти товар или артикул"></div></div>
       <div class="table-wrap"><table><thead><tr><th>Товар</th><th>Заказы</th><th>Выручка</th><th>Расходы</th><th>Прибыль</th><th>Маржа</th><th>Состояние</th></tr></thead><tbody id="product-table"></tbody></table></div>
     </section>
   </main>
@@ -74,5 +99,11 @@
     <div id="cost-fields"></div>
     <div class="dialog-actions"><button id="cost-reset">Сбросить</button><button class="connect" id="cost-save">Сохранить и пересчитать</button></div>
   </dialog>
-  <script src="dashboard.js?v=2"></script>
+  <dialog id="goal-dialog" class="cost-dialog goal-dialog">
+    <button class="dialog-close" id="goal-close" aria-label="Закрыть">×</button>
+    <p class="overline">Финансовая цель</p><h2>План чистой прибыли</h2><p>Укажите, сколько хотите заработать за месяц.</p>
+    <label class="goal-input"><span>Цель на месяц</span><input id="goal-input" type="number" min="1000" step="1000"><b>₽</b></label>
+    <div class="dialog-actions"><button id="goal-cancel">Отмена</button><button class="connect" id="goal-save">Сохранить цель</button></div>
+  </dialog>
+  <script src="dashboard.js?v=3"></script>
 </body></html>
