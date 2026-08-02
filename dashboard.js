@@ -6,22 +6,29 @@ const demo = {
   30:{revenue:827450,profit:137680,orders:641,returns:43}
 };
 const products=[
-  {name:'Органайзер для кухни',sku:'SKU-1042',orders:184,revenue:238740,expenses:183210,profit:55530},
-  {name:'Набор контейнеров, 6 шт.',sku:'SKU-2031',orders:157,revenue:196250,expenses:162880,profit:33370},
-  {name:'Лампа настольная LED',sku:'SKU-0814',orders:126,revenue:188370,expenses:164240,profit:24130},
-  {name:'Щётка для уборки',sku:'SKU-3307',orders:109,revenue:81750,expenses:71690,profit:10060},
-  {name:'Полка настенная',sku:'SKU-1179',orders:65,revenue:122340,expenses:107750,profit:14590}
+  {name:'Органайзер для кухни',sku:'SKU-1042',orders:184,revenue:238740,expenses:183210,profit:55530,unitCost:350},
+  {name:'Набор контейнеров, 6 шт.',sku:'SKU-2031',orders:157,revenue:196250,expenses:162880,profit:33370,unitCost:340},
+  {name:'Лампа настольная LED',sku:'SKU-0814',orders:126,revenue:188370,expenses:164240,profit:24130,unitCost:550},
+  {name:'Щётка для уборки',sku:'SKU-3307',orders:109,revenue:81750,expenses:71690,profit:10060,unitCost:200},
+  {name:'Полка настенная',sku:'SKU-1179',orders:65,revenue:122340,expenses:107750,profit:14590,unitCost:653}
 ];
-const expenseParts=[['Комиссия площадки',190314],['Логистика и обработка',112870],['Продвижение',89400],['Себестоимость',251320],['Налоги',49647],['Возвраты и прочее',9619]];
+const expenseParts=[['Комиссия площадки',190314],['Логистика и обработка',112870],['Продвижение',89400],['Себестоимость',251325],['Налоги',49647],['Возвраты и прочее',6214]];
+let currentPeriod=30;
+
+function savedCosts(){try{return JSON.parse(localStorage.getItem('dashboard-costs'))||{}}catch{return{}}}
+function adjustedProducts(){const costs=savedCosts();return products.map(p=>{const cost=Number(costs[p.sku]??p.unitCost);const delta=(cost-p.unitCost)*p.orders;return{...p,currentCost:cost,expenses:p.expenses+delta,profit:p.profit-delta}})}
+function costDelta(){return adjustedProducts().reduce((sum,p,i)=>sum+(p.currentCost-products[i].unitCost)*p.orders,0)}
 
 function render(period=30){
+  currentPeriod=period;
   const d=demo[period];
+  const adjustedProfit=d.profit-costDelta()*period/30;
   document.querySelector('#revenue').textContent=rub.format(d.revenue);
-  document.querySelector('#profit').textContent=rub.format(d.profit);
-  document.querySelector('#margin').textContent=`${(d.profit/d.revenue*100).toFixed(1).replace('.',',')}%`;
+  document.querySelector('#profit').textContent=rub.format(adjustedProfit);
+  document.querySelector('#margin').textContent=`${(adjustedProfit/d.revenue*100).toFixed(1).replace('.',',')}%`;
   document.querySelector('#orders').textContent=number.format(d.orders);
   document.querySelector('#returns').textContent=`Возвратов: ${d.returns}`;
-  renderChart(period,d.revenue,d.profit);
+  renderChart(period,d.revenue,adjustedProfit);
 }
 function renderChart(days,revenue,profit){
   const points=days===7?7:days===14?14:15;
@@ -30,14 +37,22 @@ function renderChart(days,revenue,profit){
   document.querySelector('#chart').innerHTML=weights.map((w,i)=>`<div class="chart-day"><i class="bar revenue" style="height:${Math.round(w/max*88)}%" title="Выручка: ${rub.format(revenue/points*w)}"></i><i class="bar profit" style="height:${Math.max(6,Math.round(w/max*88*profit/revenue*2.7))}%" title="Прибыль: ${rub.format(profit/points*w)}"></i><label>${i%Math.ceil(points/7)===0?i+1:''}</label></div>`).join('');
 }
 function renderExpenses(){
-  const total=expenseParts.reduce((sum,item)=>sum+item[1],0);
+  const parts=expenseParts.map(item=>item[0]==='Себестоимость'?[item[0],item[1]+costDelta()]:item);
+  const total=parts.reduce((sum,item)=>sum+item[1],0);
   document.querySelector('#expense-total').textContent=rub.format(total);
-  document.querySelector('#expense-list').innerHTML=expenseParts.map(([name,value])=>`<div class="expense-row"><div class="expense-meta"><span>${name}</span><b>${rub.format(value)}</b></div><div class="track"><div class="fill" style="width:${value/total*100}%"></div></div></div>`).join('');
+  document.querySelector('#expense-list').innerHTML=parts.map(([name,value])=>`<div class="expense-row"><div class="expense-meta"><span>${name}</span><b>${rub.format(value)}</b></div><div class="track"><div class="fill" style="width:${value/total*100}%"></div></div></div>`).join('');
 }
 function renderProducts(query=''){
-  const rows=products.filter(p=>`${p.name} ${p.sku}`.toLowerCase().includes(query.toLowerCase()));
+  const rows=adjustedProducts().filter(p=>`${p.name} ${p.sku}`.toLowerCase().includes(query.toLowerCase()));
   document.querySelector('#product-table').innerHTML=rows.map(p=>{const margin=p.profit/p.revenue*100;const state=margin>=15?['Прибыльный','']:margin>=8?['Требует внимания','warn']:['В зоне риска','bad'];return `<tr><td class="product-cell"><b>${p.name}</b><small>${p.sku}</small></td><td>${p.orders}</td><td>${rub.format(p.revenue)}</td><td>${rub.format(p.expenses)}</td><td class="${p.profit>=0?'positive':'negative'}">${rub.format(p.profit)}</td><td>${margin.toFixed(1).replace('.',',')}%</td><td><span class="badge ${state[1]}">${state[0]}</span></td></tr>`}).join('');
 }
 document.querySelector('#period').addEventListener('change',e=>render(Number(e.target.value)));
 document.querySelector('#product-search').addEventListener('input',e=>renderProducts(e.target.value));
+const costDialog=document.querySelector('#cost-dialog');
+function openCosts(){document.querySelector('#cost-fields').innerHTML=adjustedProducts().map(p=>`<label><span>${p.name}<small>${p.sku}</small></span><input type="number" min="0" step="1" name="${p.sku}" value="${p.currentCost}"><b>₽ / шт.</b></label>`).join('');costDialog.showModal()}
+document.querySelector('#cost-button').addEventListener('click',openCosts);
+document.querySelector('#cost-close').addEventListener('click',()=>costDialog.close());
+document.querySelector('#cost-reset').addEventListener('click',()=>{localStorage.removeItem('dashboard-costs');costDialog.close();render(currentPeriod);renderExpenses();renderProducts()});
+document.querySelector('#cost-save').addEventListener('click',()=>{const values={};document.querySelectorAll('#cost-fields input').forEach(input=>values[input.name]=Math.max(0,Number(input.value)||0));localStorage.setItem('dashboard-costs',JSON.stringify(values));costDialog.close();render(currentPeriod);renderExpenses();renderProducts()});
+document.querySelector('#export-button').addEventListener('click',()=>{const header=['Артикул','Товар','Заказы','Выручка','Расходы','Прибыль','Маржа'];const rows=adjustedProducts().map(p=>[p.sku,p.name,p.orders,p.revenue,Math.round(p.expenses),Math.round(p.profit),(p.profit/p.revenue*100).toFixed(1)]);const csv='\uFEFF'+[header,...rows].map(row=>row.map(cell=>`"${String(cell).replaceAll('"','""')}"`).join(';')).join('\n');const link=document.createElement('a');link.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));link.download='chistaya-marzha-ozon.csv';link.click();URL.revokeObjectURL(link.href)});
 render();renderExpenses();renderProducts();

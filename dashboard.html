@@ -27,6 +27,7 @@
     <header class="dashboard-header">
       <div><p class="overline">Ozon · аналитика магазина</p><h1>Добрый день</h1></div>
       <div class="header-actions">
+        <button class="export-button" id="export-button">↓ Экспорт CSV</button>
         <label class="period-label">Период<select id="period"><option value="7">7 дней</option><option value="14">14 дней</option><option value="30" selected>30 дней</option></select></label>
         <a class="connect" href="connect-ozon.html">Подключить Ozon</a>
       </div>
@@ -39,6 +40,12 @@
       <article><span>Чистая прибыль</span><strong id="profit">—</strong><small class="up">↑ 8,1% к прошлому периоду</small></article>
       <article><span>Маржинальность</span><strong id="margin">—</strong><small>Цель: выше 15%</small></article>
       <article><span>Заказы</span><strong id="orders">—</strong><small id="returns">—</small></article>
+    </section>
+
+    <section class="insights" aria-label="Краткие выводы">
+      <article class="insight good"><span>↗</span><div><b>Прибыль растёт</b><p>Темп прибыли положительный. Маржа находится выше цели на 1,6 п.п.</p></div></article>
+      <article class="insight warn"><span>!</span><div><b>Реклама требует внимания</b><p>Продвижение занимает 10,8% выручки. Проверьте кампании слабых товаров.</p></div></article>
+      <article class="insight neutral"><span>◎</span><div><b>Лучший товар</b><p>Органайзер приносит 40% всей чистой прибыли магазина.</p></div></article>
     </section>
 
     <section class="grid-main">
@@ -55,10 +62,17 @@
     </section>
 
     <section class="widget products" id="products">
-      <div class="widget-title"><div><p class="overline">Юнит-экономика</p><h2>Прибыльность товаров</h2></div><input id="product-search" type="search" placeholder="Найти товар или артикул"></div>
+      <div class="widget-title"><div><p class="overline">Юнит-экономика</p><h2>Прибыльность товаров</h2></div><div class="table-actions"><button id="cost-button">Настроить себестоимость</button><input id="product-search" type="search" placeholder="Найти товар или артикул"></div></div>
       <div class="table-wrap"><table><thead><tr><th>Товар</th><th>Заказы</th><th>Выручка</th><th>Расходы</th><th>Прибыль</th><th>Маржа</th><th>Состояние</th></tr></thead><tbody id="product-table"></tbody></table></div>
     </section>
   </main>
 
+  <dialog id="cost-dialog" class="cost-dialog">
+    <button class="dialog-close" id="cost-close" aria-label="Закрыть">×</button>
+    <p class="overline">Настройки расчёта</p><h2>Себестоимость товаров</h2>
+    <p>Укажите затраты на одну единицу. Значения сохраняются только в этом браузере.</p>
+    <div id="cost-fields"></div>
+    <div class="dialog-actions"><button id="cost-reset">Сбросить</button><button class="connect" id="cost-save">Сохранить и пересчитать</button></div>
+  </dialog>
   <script src="dashboard.js"></script>
 </body></html>
