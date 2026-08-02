@@ -77,3 +77,8 @@ create trigger on_auth_user_created after insert on auth.users for each row exec
 create index marketplace_accounts_user_idx on public.marketplace_accounts(user_id);
 create index subscriptions_user_idx on public.subscriptions(user_id);
 create index sync_runs_account_idx on public.sync_runs(marketplace_account_id, started_at desc);
+
+-- Explicit browser permissions; RLS policies still restrict every row.
+grant usage on schema public to authenticated;
+grant select on public.profiles, public.marketplace_accounts, public.subscriptions, public.sync_runs to authenticated;
+grant update (display_name, updated_at) on public.profiles to authenticated;
