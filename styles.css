@@ -16,6 +16,8 @@ body { margin: 0; background: var(--paper); color: var(--ink); font-family: Inte
 .brand { color: var(--ink); text-decoration: none; font-size: 20px; font-weight: 850; letter-spacing: -1px; }
 .brand span { color: var(--green); }
 .ghost-link { color: var(--ink); text-underline-offset: 5px; font-size: 14px; }
+.header-links { display: flex; align-items: center; gap: 22px; }
+.header-links a { color: var(--ink); font-size: 14px; text-underline-offset: 5px; }
 .hero { padding: 96px 0 74px; max-width: 900px; }
 .eyebrow { display: inline-block; margin-bottom: 22px; border: 1px solid var(--ink); border-radius: 999px; padding: 8px 13px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
 h1 { font-size: clamp(45px, 7vw, 88px); letter-spacing: -.065em; line-height: .96; margin: 0 0 26px; }
@@ -77,4 +79,5 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 28px
   .fields, .cards { grid-template-columns: 1fr; }
   .panel { padding: 22px 18px; }
   footer { flex-direction: column; }
+  .header-links a:first-child { display: none; }
 }

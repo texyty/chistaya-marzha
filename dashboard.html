@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Дашборд прибыли продавца Ozon: продажи, расходы площадки, возвраты и прибыль по товарам.">
+  <meta name="robots" content="index,follow">
+  <title>Дашборд продавца Ozon — Чистая маржа</title>
+  <link rel="canonical" href="https://texyty.github.io/chistaya-marzha/dashboard.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="index.html">чистая<span>маржа</span></a>
+    <nav>
+      <a class="active" href="#overview">Обзор</a>
+      <a href="#products">Товары</a>
+      <a href="#expenses">Расходы Ozon</a>
+      <a href="index.html#calculator">Калькулятор</a>
+    </nav>
+    <div class="account"><span class="status-dot"></span><div><b>Демо-магазин</b><small>Тестовые данные</small></div></div>
+  </aside>
+
+  <main class="dashboard" id="overview">
+    <header class="dashboard-header">
+      <div><p class="overline">Ozon · аналитика магазина</p><h1>Добрый день</h1></div>
+      <div class="header-actions">
+        <label class="period-label">Период<select id="period"><option value="7">7 дней</option><option value="14">14 дней</option><option value="30" selected>30 дней</option></select></label>
+        <button class="connect" id="connect-button">Подключить Ozon</button>
+      </div>
+    </header>
+
+    <div class="demo-note"><b>Демонстрационный режим.</b> Сейчас показаны реалистичные тестовые данные. Подключение кабинета добавим через API только для чтения.</div>
+
+    <section class="kpis" aria-label="Ключевые показатели">
+      <article><span>Выручка</span><strong id="revenue">—</strong><small class="up">↑ 12,4% к прошлому периоду</small></article>
+      <article><span>Чистая прибыль</span><strong id="profit">—</strong><small class="up">↑ 8,1% к прошлому периоду</small></article>
+      <article><span>Маржинальность</span><strong id="margin">—</strong><small>Цель: выше 15%</small></article>
+      <article><span>Заказы</span><strong id="orders">—</strong><small id="returns">—</small></article>
+    </section>
+
+    <section class="grid-main">
+      <article class="widget chart-widget">
+        <div class="widget-title"><div><p class="overline">Динамика</p><h2>Выручка и прибыль</h2></div><div class="legend"><span><i class="revenue-dot"></i>Выручка</span><span><i class="profit-dot"></i>Прибыль</span></div></div>
+        <div class="chart" id="chart" role="img" aria-label="График выручки и прибыли"></div>
+      </article>
+
+      <article class="widget" id="expenses">
+        <div class="widget-title"><div><p class="overline">Структура</p><h2>Куда уходят деньги</h2></div></div>
+        <div class="expense-total"><span>Расходы всего</span><b id="expense-total">—</b></div>
+        <div class="expense-list" id="expense-list"></div>
+      </article>
+    </section>
+
+    <section class="widget products" id="products">
+      <div class="widget-title"><div><p class="overline">Юнит-экономика</p><h2>Прибыльность товаров</h2></div><input id="product-search" type="search" placeholder="Найти товар или артикул"></div>
+      <div class="table-wrap"><table><thead><tr><th>Товар</th><th>Заказы</th><th>Выручка</th><th>Расходы</th><th>Прибыль</th><th>Маржа</th><th>Состояние</th></tr></thead><tbody id="product-table"></tbody></table></div>
+    </section>
+  </main>
+
+  <dialog id="connect-dialog">
+    <button class="dialog-close" id="dialog-close" aria-label="Закрыть">×</button>
+    <span class="dialog-icon">O₃</span>
+    <h2>Подключение Ozon готовим</h2>
+    <p>Интерфейс дашборда уже работает. Следующим этапом добавим защищённый сервер и подключение официального Seller API с правами только на чтение.</p>
+    <div class="safe-list"><span>✓ Не меняем товары</span><span>✓ Не меняем цены</span><span>✓ Не управляем заказами</span></div>
+    <button class="connect wide" id="dialog-ok">Понятно</button>
+  </dialog>
+  <script src="dashboard.js"></script>
+</body></html>
