@@ -9,6 +9,7 @@
   <link rel="canonical" href="https://texyty.github.io/chistaya-marzha/dashboard.html">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="dashboard.css">
+  <link rel="stylesheet" href="dashboard-overrides.css">
 </head>
 <body>
   <aside class="sidebar">
@@ -27,7 +28,7 @@
       <div><p class="overline">Ozon · аналитика магазина</p><h1>Добрый день</h1></div>
       <div class="header-actions">
         <label class="period-label">Период<select id="period"><option value="7">7 дней</option><option value="14">14 дней</option><option value="30" selected>30 дней</option></select></label>
-        <button class="connect" id="connect-button">Подключить Ozon</button>
+        <a class="connect" href="connect-ozon.html">Подключить Ozon</a>
       </div>
     </header>
 
@@ -59,13 +60,5 @@
     </section>
   </main>
 
-  <dialog id="connect-dialog">
-    <button class="dialog-close" id="dialog-close" aria-label="Закрыть">×</button>
-    <span class="dialog-icon">O₃</span>
-    <h2>Подключение Ozon готовим</h2>
-    <p>Интерфейс дашборда уже работает. Следующим этапом добавим защищённый сервер и подключение официального Seller API с правами только на чтение.</p>
-    <div class="safe-list"><span>✓ Не меняем товары</span><span>✓ Не меняем цены</span><span>✓ Не управляем заказами</span></div>
-    <button class="connect wide" id="dialog-ok">Понятно</button>
-  </dialog>
   <script src="dashboard.js"></script>
 </body></html>

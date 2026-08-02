@@ -40,8 +40,4 @@ function renderProducts(query=''){
 }
 document.querySelector('#period').addEventListener('change',e=>render(Number(e.target.value)));
 document.querySelector('#product-search').addEventListener('input',e=>renderProducts(e.target.value));
-const dialog=document.querySelector('#connect-dialog');
-document.querySelector('#connect-button').addEventListener('click',()=>dialog.showModal());
-document.querySelector('#dialog-close').addEventListener('click',()=>dialog.close());
-document.querySelector('#dialog-ok').addEventListener('click',()=>dialog.close());
 render();renderExpenses();renderProducts();
