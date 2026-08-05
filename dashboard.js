@@ -10,7 +10,7 @@ function enhanceDashboardSelect(select){
   shell.append(trigger,menu);
   const sync=()=>{value.textContent=select.selectedOptions[0]?.textContent||'';options.forEach(option=>{const active=option.dataset.value===select.value;option.classList.toggle('is-selected',active);option.setAttribute('aria-selected',String(active))})};
   const close=()=>{shell.classList.remove('is-open');trigger.setAttribute('aria-expanded','false');menu.hidden=true};
-  const open=()=>{document.querySelectorAll('.dash-select.is-open').forEach(item=>item!==shell&&item.querySelector('.dash-select__trigger')?.click());shell.classList.add('is-open');trigger.setAttribute('aria-expanded','true');menu.hidden=false};
+  const open=()=>{document.querySelectorAll('.dash-select.is-open').forEach(item=>item!==shell&&item.querySelector('.dash-select__trigger')?.click());const rect=trigger.getBoundingClientRect();Object.assign(menu.style,{position:'fixed',top:`${rect.bottom+7}px`,left:`${rect.left}px`,right:'auto',width:`${rect.width}px`});shell.classList.add('is-open');trigger.setAttribute('aria-expanded','true');menu.hidden=false};
   trigger.addEventListener('click',()=>shell.classList.contains('is-open')?close():open());
   menu.addEventListener('click',event=>{const option=event.target.closest('.dash-select__option');if(!option)return;select.value=option.dataset.value;select.dispatchEvent(new Event('change',{bubbles:true}));sync();close();trigger.focus()});
   trigger.addEventListener('keydown',event=>{if(event.key==='Escape'){close();return}if(['Enter',' ','ArrowDown'].includes(event.key)){event.preventDefault();open();options.find(option=>option.classList.contains('is-selected'))?.focus()}});
