@@ -3,6 +3,24 @@ const db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
 const escapeHtml = value => String(value || '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
 let currentProfile = null;
 
+function enhanceAccountSelect(select) {
+  const shell = document.createElement('div'); shell.className = 'account-select'; select.parentNode.insertBefore(shell, select); shell.appendChild(select);
+  const trigger = document.createElement('button'); trigger.type = 'button'; trigger.className = 'account-select__trigger'; trigger.setAttribute('aria-haspopup', 'listbox'); trigger.setAttribute('aria-expanded', 'false');
+  const value = document.createElement('span'); const arrow = document.createElement('i'); arrow.setAttribute('aria-hidden', 'true'); trigger.append(value, arrow);
+  const menu = document.createElement('div'); menu.className = 'account-select__menu'; menu.setAttribute('role', 'listbox'); menu.hidden = true;
+  const options = [...select.options].map(option => { const button = document.createElement('button'); button.type = 'button'; button.className = 'account-select__option'; button.setAttribute('role', 'option'); button.dataset.value = option.value; button.innerHTML = `<span>${option.textContent}</span><i>✓</i>`; menu.appendChild(button); return button; });
+  shell.append(trigger, menu);
+  const sync = () => { value.textContent = select.selectedOptions[0]?.textContent || ''; options.forEach(option => { const active = option.dataset.value === select.value; option.classList.toggle('is-selected', active); option.setAttribute('aria-selected', String(active)); }); };
+  const close = () => { shell.classList.remove('is-open'); trigger.setAttribute('aria-expanded', 'false'); menu.hidden = true; };
+  const open = () => { document.querySelectorAll('.account-select.is-open').forEach(item => item !== shell && item.querySelector('.account-select__trigger')?.click()); const rect = trigger.getBoundingClientRect(); Object.assign(menu.style, { position: 'fixed', top: `${rect.bottom + 7}px`, left: `${rect.left}px`, width: `${Math.max(rect.width, 190)}px` }); shell.classList.add('is-open'); trigger.setAttribute('aria-expanded', 'true'); menu.hidden = false; };
+  trigger.addEventListener('click', () => shell.classList.contains('is-open') ? close() : open());
+  menu.addEventListener('click', event => { const option = event.target.closest('.account-select__option'); if (!option) return; select.value = option.dataset.value; select.dispatchEvent(new Event('change', { bubbles: true })); sync(); close(); trigger.focus(); });
+  trigger.addEventListener('keydown', event => { if (event.key === 'Escape') return close(); if (['Enter', ' ', 'ArrowDown'].includes(event.key)) { event.preventDefault(); open(); options.find(option => option.classList.contains('is-selected'))?.focus(); } });
+  select.addEventListener('change', sync); document.addEventListener('click', event => { if (!shell.contains(event.target) && !menu.contains(event.target)) close(); }); select._syncCustom = sync; sync();
+}
+
+document.querySelectorAll('select').forEach(enhanceAccountSelect);
+
 async function callOzon(action, accountId) {
   const { data: { session } } = await db.auth.getSession();
   if (!session) { location.href = 'auth.html'; return; }
@@ -55,6 +73,7 @@ async function load() {
     document.querySelector('#country-code').value = profile.country_code || 'RU';
     document.querySelector('#tax-mode').value = profile.tax_mode || 'ru_usn_income';
     document.querySelector('#tax-rate').value = profile.tax_rate ?? 6;
+    document.querySelectorAll('select').forEach(select => select._syncCustom?.());
     updateTaxExplainer();
   }
   if (accounts?.length) {
