@@ -1,12 +1,13 @@
 const form = document.querySelector('#profit-form');
 const currencySelect = document.querySelector('#currency');
 const taxProfile = document.querySelector('#tax-profile');
-const localeByCurrency = { RUB: 'ru-RU', USD: 'en-US', EUR: 'de-DE', KZT: 'kk-KZ', BYN: 'be-BY', CNY: 'zh-CN', AED: 'ar-AE', TRY: 'tr-TR' };
-let currency = localStorage.getItem('cm-currency') || 'RUB';
+const localeByCurrency = { RUB: 'ru-RU', BYN: 'be-BY', KZT: 'kk-KZ', AMD: 'hy-AM', KGS: 'ky-KG', UZS: 'uz-UZ' };
+const supportedCurrencies = ['RUB', 'BYN', 'KZT', 'AMD', 'KGS', 'UZS'];
+let currency = supportedCurrencies.includes(localStorage.getItem('cm-currency')) ? localStorage.getItem('cm-currency') : 'RUB';
 currencySelect.value = currency;
 
 const value = (name) => Math.max(0, Number(new FormData(form).get(name)) || 0);
-const money = (amount) => new Intl.NumberFormat(localeByCurrency[currency] || 'en-US', { style: 'currency', currency, maximumFractionDigits: currency === 'KZT' ? 0 : 2 }).format(amount);
+const money = (amount) => new Intl.NumberFormat(localeByCurrency[currency] || 'ru-RU', { style: 'currency', currency, maximumFractionDigits: currency === 'BYN' ? 2 : 0 }).format(amount);
 const percent = (amount) => new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 1 }).format(amount);
 
 function applyTaxProfile() {
@@ -44,6 +45,11 @@ function calculate() {
   document.querySelector('#tax-value').textContent = money(tax);
   document.querySelector('#break-even').textContent = Number.isFinite(breakEven) ? money(breakEven) : 'Недостижима';
   document.querySelector('#profit-100').textContent = money(profit * 100);
+  ['#profit', '#margin', '#expenses', '#commission-value', '#tax-value', '#break-even', '#profit-100'].forEach(selector => {
+    const element = document.querySelector(selector);
+    element.classList.remove('value-pop');
+    requestAnimationFrame(() => element.classList.add('value-pop'));
+  });
   document.querySelector('#verdict').textContent = profit < 0 ? 'Товар продаётся в убыток' : margin < 10 ? 'Запас маржи слишком мал' : 'Экономика товара положительная';
   document.querySelector('#verdict').className = `profit-state ${profit < 0 ? 'negative' : 'positive'}`;
   localStorage.setItem('chistaya-marzha-values', JSON.stringify(Object.fromEntries(new FormData(form).entries())));
@@ -53,7 +59,7 @@ function setCurrency() {
   currency = currencySelect.value;
   localStorage.setItem('cm-currency', currency);
   document.querySelectorAll('[data-currency-label]').forEach(el => { el.textContent = currency; });
-  const demo = { RUB: 284930, USD: 3120, EUR: 2860, KZT: 1480000, BYN: 9650, CNY: 22600, AED: 11450, TRY: 105000 }[currency];
+  const demo = { RUB: 284930, BYN: 9650, KZT: 1480000, AMD: 1240000, KGS: 284000, UZS: 39200000 }[currency];
   document.querySelector('#hero-money').textContent = money(demo);
   calculate();
 }
@@ -72,3 +78,15 @@ try {
   if (saved) Object.entries(saved).forEach(([name, savedValue]) => { const field = form.elements.namedItem(name); if (field) field.value = savedValue; });
 } catch { localStorage.removeItem('chistaya-marzha-values'); }
 setCurrency();
+
+const revealTargets = document.querySelectorAll('.logos, .calc-panel, .result-panel, .section-head, .feature-grid article, .rate-grid article, .cta');
+revealTargets.forEach((element, index) => {
+  element.classList.add('reveal');
+  element.style.transitionDelay = `${Math.min(index % 4, 3) * 70}ms`;
+});
+if ('IntersectionObserver' in window) {
+  const observer = new IntersectionObserver(entries => entries.forEach(entry => {
+    if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target); }
+  }), { threshold: .12 });
+  revealTargets.forEach(element => observer.observe(element));
+} else revealTargets.forEach(element => element.classList.add('is-visible'));
