@@ -21,24 +21,31 @@ function enhanceAccountSelect(select) {
 
 document.querySelectorAll('select').forEach(enhanceAccountSelect);
 
-async function callOzon(action, accountId) {
+const marketplaceMeta = {
+  ozon: { name: 'Ozon', href: 'connect-ozon.html', logo: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/%D0%9E%D0%97%D0%9E%D0%9D_%D0%9B%D0%9E%D0%93%D0%9E.png' },
+  wildberries: { name: 'Wildberries', href: 'connect-wildberries.html', logo: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Wildberries_2023_Pink.svg' },
+  yandex_market: { name: 'Яндекс Маркет', href: 'connect-yandex-market.html', logo: 'https://yastatic.net/q/logoaas/v2/%D0%AF%D0%BD%D0%B4%D0%B5%D0%BA%D1%81%20%D0%9C%D0%B0%D1%80%D0%BA%D0%B5%D1%82.svg' }
+};
+
+async function callMarketplace(provider, action, accountId) {
   const { data: { session } } = await db.auth.getSession();
   if (!session) { location.href = 'auth.html'; return; }
-  const response = await fetch(`${cfg.supabaseUrl}/functions/v1/ozon-connect`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}`, apikey: cfg.supabaseAnonKey }, body: JSON.stringify({ action, accountId }) });
+  const endpoint = provider === 'ozon' ? 'ozon-connect' : 'marketplace-connect';
+  const response = await fetch(`${cfg.supabaseUrl}/functions/v1/${endpoint}`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}`, apikey: cfg.supabaseAnonKey }, body: JSON.stringify({ action, accountId, provider }) });
   const result = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(result.error || 'Не удалось выполнить действие.');
   return result;
 }
 
-const marketplaceOptions = () => `<div class="marketplace-additions"><article class="marketplace-option available"><div class="marketplace-wordmark"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/%D0%9E%D0%97%D0%9E%D0%9D_%D0%9B%D0%9E%D0%93%D0%9E.png" alt="Ozon"></div><div><b>Ещё один магазин Ozon</b><p>Подключите дополнительный кабинет продавца.</p></div><a href="connect-ozon.html">Добавить →</a></article><article class="marketplace-option"><div class="marketplace-wordmark"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Wildberries_2023_Pink.svg" alt="Wildberries"></div><div><b>Wildberries</b><p>Интеграция находится в разработке.</p></div><span class="coming-soon">Скоро</span></article><article class="marketplace-option"><div class="marketplace-wordmark"><img src="https://yastatic.net/q/logoaas/v2/%D0%AF%D0%BD%D0%B4%D0%B5%D0%BA%D1%81%20%D0%9C%D0%B0%D1%80%D0%BA%D0%B5%D1%82.svg" alt="Яндекс Маркет"></div><div><b>Яндекс Маркет</b><p>Интеграция находится в разработке.</p></div><span class="coming-soon">Скоро</span></article></div>`;
+const marketplaceOptions = () => `<div class="marketplace-additions">${Object.entries(marketplaceMeta).map(([provider, meta]) => `<article class="marketplace-option available"><div class="marketplace-wordmark"><img src="${meta.logo}" alt="${meta.name}"></div><div><b>Добавить ${meta.name}</b><p>Подключить ещё один кабинет продавца.</p></div><a href="${meta.href}">Добавить →</a></article>`).join('')}</div>`;
 
 function renderAccounts(accounts) {
   const list = document.querySelector('#connection-list');
   if (!accounts?.length) return;
   list.classList.remove('marketplace-options');
-  list.innerHTML = `<div class="connected-accounts">${accounts.map(a => `<article class="connected-store"><div class="marketplace-wordmark compact"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/%D0%9E%D0%97%D0%9E%D0%9D_%D0%9B%D0%9E%D0%93%D0%9E.png" alt="Ozon"></div><div><b>${escapeHtml(a.account_name || 'Магазин Ozon')}</b><p>ID продавца: ${escapeHtml(a.external_account_id || '—')}</p><small>${a.last_sync_at ? `Обновлено ${new Date(a.last_sync_at).toLocaleString('ru-RU')}` : 'Ожидает синхронизации'}</small></div><div class="store-actions"><span class="connection-status ${a.status}">${a.status === 'connected' ? 'Подключён' : a.status === 'error' ? 'Ошибка' : 'Отключён'}</span>${a.status === 'connected' ? `<button data-sync="${a.id}">Обновить</button><button class="danger" data-disconnect="${a.id}">Отключить</button>` : '<a href="connect-ozon.html">Подключить заново</a>'}</div></article>`).join('')}</div>${marketplaceOptions()}`;
-  list.querySelectorAll('[data-sync]').forEach(button => button.addEventListener('click', async () => { button.disabled = true; button.textContent = 'Обновляем…'; try { await callOzon('sync', button.dataset.sync); location.reload(); } catch (error) { alert(error.message); button.disabled = false; button.textContent = 'Обновить'; } }));
-  list.querySelectorAll('[data-disconnect]').forEach(button => button.addEventListener('click', async () => { if (!confirm('Отключить магазин? Зашифрованный ключ будет удалён. Товары не изменятся.')) return; button.disabled = true; try { await callOzon('disconnect', button.dataset.disconnect); location.reload(); } catch (error) { alert(error.message); button.disabled = false; } }));
+  list.innerHTML = `<div class="connected-accounts">${accounts.map(a => { const meta = marketplaceMeta[a.provider] || marketplaceMeta.ozon; return `<article class="connected-store"><div class="marketplace-wordmark compact"><img src="${meta.logo}" alt="${meta.name}"></div><div><b>${escapeHtml(a.account_name || `Магазин ${meta.name}`)}</b><p>${meta.name} · ID: ${escapeHtml(a.external_account_id || '—')}</p><small>${a.last_sync_at ? `Обновлено ${new Date(a.last_sync_at).toLocaleString('ru-RU')}` : 'Ожидает синхронизации'}</small></div><div class="store-actions"><span class="connection-status ${a.status}">${a.status === 'connected' ? 'Подключён' : a.status === 'error' ? 'Ошибка' : 'Отключён'}</span>${a.status === 'connected' ? `<button data-provider="${a.provider}" data-sync="${a.id}">Проверить</button><button class="danger" data-provider="${a.provider}" data-disconnect="${a.id}">Отключить</button>` : `<a href="${meta.href}">Подключить заново</a>`}</div></article>`; }).join('')}</div>${marketplaceOptions()}`;
+  list.querySelectorAll('[data-sync]').forEach(button => button.addEventListener('click', async () => { button.disabled = true; button.textContent = 'Проверяем…'; try { await callMarketplace(button.dataset.provider, 'sync', button.dataset.sync); location.reload(); } catch (error) { alert(error.message); button.disabled = false; button.textContent = 'Проверить'; } }));
+  list.querySelectorAll('[data-disconnect]').forEach(button => button.addEventListener('click', async () => { if (!confirm('Отключить магазин? Зашифрованный ключ будет удалён. Товары не изменятся.')) return; button.disabled = true; try { await callMarketplace(button.dataset.provider, 'disconnect', button.dataset.disconnect); location.reload(); } catch (error) { alert(error.message); button.disabled = false; } }));
 }
 
 const taxCopy = {

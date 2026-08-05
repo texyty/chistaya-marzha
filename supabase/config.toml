@@ -2,3 +2,6 @@ project_id = "bsokmwaujfjotnpvzpln"
 
 [functions.ozon-connect]
 verify_jwt = true
+
+[functions.marketplace-connect]
+verify_jwt = true
