@@ -1,5 +1,22 @@
 const rub = new Intl.NumberFormat('ru-RU',{style:'currency',currency:'RUB',maximumFractionDigits:0});
 const number = new Intl.NumberFormat('ru-RU');
+
+function enhanceDashboardSelect(select){
+  const shell=document.createElement('div');shell.className='dash-select';select.parentNode.insertBefore(shell,select);shell.appendChild(select);
+  const trigger=document.createElement('button');trigger.type='button';trigger.className='dash-select__trigger';trigger.setAttribute('aria-haspopup','listbox');trigger.setAttribute('aria-expanded','false');
+  const value=document.createElement('span');const arrow=document.createElement('i');arrow.setAttribute('aria-hidden','true');trigger.append(value,arrow);
+  const menu=document.createElement('div');menu.className='dash-select__menu';menu.setAttribute('role','listbox');menu.hidden=true;
+  const options=[...select.options].map(option=>{const button=document.createElement('button');button.type='button';button.className='dash-select__option';button.setAttribute('role','option');button.dataset.value=option.value;button.innerHTML=`<span>${option.textContent}</span><i>✓</i>`;menu.appendChild(button);return button});
+  shell.append(trigger,menu);
+  const sync=()=>{value.textContent=select.selectedOptions[0]?.textContent||'';options.forEach(option=>{const active=option.dataset.value===select.value;option.classList.toggle('is-selected',active);option.setAttribute('aria-selected',String(active))})};
+  const close=()=>{shell.classList.remove('is-open');trigger.setAttribute('aria-expanded','false');menu.hidden=true};
+  const open=()=>{document.querySelectorAll('.dash-select.is-open').forEach(item=>item!==shell&&item.querySelector('.dash-select__trigger')?.click());shell.classList.add('is-open');trigger.setAttribute('aria-expanded','true');menu.hidden=false};
+  trigger.addEventListener('click',()=>shell.classList.contains('is-open')?close():open());
+  menu.addEventListener('click',event=>{const option=event.target.closest('.dash-select__option');if(!option)return;select.value=option.dataset.value;select.dispatchEvent(new Event('change',{bubbles:true}));sync();close();trigger.focus()});
+  trigger.addEventListener('keydown',event=>{if(event.key==='Escape'){close();return}if(['Enter',' ','ArrowDown'].includes(event.key)){event.preventDefault();open();options.find(option=>option.classList.contains('is-selected'))?.focus()}});
+  document.addEventListener('click',event=>{if(!shell.contains(event.target))close()});sync();
+}
+document.querySelectorAll('select').forEach(enhanceDashboardSelect);
 const demo = {
   7:{revenue:184320,profit:32140,orders:143,returns:8},
   14:{revenue:378640,profit:61120,orders:294,returns:19},

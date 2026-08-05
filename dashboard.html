@@ -9,7 +9,7 @@
   <link rel="canonical" href="https://texyty.github.io/chistaya-marzha/dashboard.html">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="dashboard.css?v=3">
-  <link rel="stylesheet" href="dashboard-overrides.css?v=3">
+  <link rel="stylesheet" href="dashboard-overrides.css?v=4">
 </head>
 <body>
   <aside class="sidebar">
@@ -21,12 +21,12 @@
       <a href="#plan">План месяца</a>
       <a href="index.html#calculator">Калькулятор</a>
     </nav>
-    <div class="account"><span class="status-dot"></span><div><b>Демо-магазин</b><small>Тестовые данные</small></div></div>
+    <div class="account"><span class="market-avatar"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/%D0%9E%D0%97%D0%9E%D0%9D_%D0%9B%D0%9E%D0%93%D0%9E.png" alt=""></span><div><b>Демо-магазин</b><small><i class="status-dot"></i> Тестовые данные</small></div></div>
   </aside>
 
   <main class="dashboard" id="overview">
     <header class="dashboard-header">
-      <div><p class="overline">Ozon · аналитика магазина</p><h1>Добрый день</h1></div>
+      <div><div class="market-context"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/%D0%9E%D0%97%D0%9E%D0%9D_%D0%9B%D0%9E%D0%93%D0%9E.png" alt="Ozon"><span>аналитика магазина</span></div><h1>Добрый день</h1></div>
       <div class="header-actions">
         <button class="export-button" id="export-button">↓ Экспорт CSV</button>
         <label class="period-label">Период<select id="period"><option value="7">7 дней</option><option value="14">14 дней</option><option value="30" selected>30 дней</option></select></label>
@@ -105,5 +105,5 @@
     <label class="goal-input"><span>Цель на месяц</span><input id="goal-input" type="number" min="1000" step="1000"><b>₽</b></label>
     <div class="dialog-actions"><button id="goal-cancel">Отмена</button><button class="connect" id="goal-save">Сохранить цель</button></div>
   </dialog>
-  <script src="dashboard.js?v=3"></script>
+  <script src="dashboard.js?v=4"></script>
 </body></html>
