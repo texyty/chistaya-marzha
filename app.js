@@ -1,5 +1,92 @@
 const form = document.querySelector('#profit-form');
 const currencySelect = document.querySelector('#currency');
+
+function enhanceSelect(select) {
+  if (select.dataset.enhanced) return;
+  select.dataset.enhanced = 'true';
+
+  const shell = document.createElement('div');
+  shell.className = 'smart-select';
+  select.parentNode.insertBefore(shell, select);
+  shell.appendChild(select);
+
+  const trigger = document.createElement('button');
+  trigger.className = 'smart-select__trigger';
+  trigger.type = 'button';
+  trigger.setAttribute('aria-haspopup', 'listbox');
+  trigger.setAttribute('aria-expanded', 'false');
+
+  const value = document.createElement('span');
+  const arrow = document.createElement('i');
+  arrow.setAttribute('aria-hidden', 'true');
+  trigger.append(value, arrow);
+
+  const menu = document.createElement('div');
+  menu.className = 'smart-select__menu';
+  menu.setAttribute('role', 'listbox');
+  menu.hidden = true;
+
+  const options = [...select.options].map((option, index) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'smart-select__option';
+    button.setAttribute('role', 'option');
+    button.dataset.value = option.value;
+    button.dataset.index = index;
+    button.innerHTML = `<span>${option.textContent}</span><i aria-hidden="true">✓</i>`;
+    menu.appendChild(button);
+    return button;
+  });
+
+  shell.append(trigger, menu);
+
+  const sync = () => {
+    value.textContent = select.selectedOptions[0]?.textContent || '';
+    options.forEach((option) => {
+      const selected = option.dataset.value === select.value;
+      option.classList.toggle('is-selected', selected);
+      option.setAttribute('aria-selected', String(selected));
+    });
+  };
+  const close = () => {
+    shell.classList.remove('is-open');
+    trigger.setAttribute('aria-expanded', 'false');
+    menu.hidden = true;
+  };
+  const open = () => {
+    document.querySelectorAll('.smart-select.is-open').forEach((item) => {
+      if (item !== shell) item.querySelector('.smart-select__trigger')?.click();
+    });
+    shell.classList.add('is-open');
+    trigger.setAttribute('aria-expanded', 'true');
+    menu.hidden = false;
+  };
+
+  trigger.addEventListener('click', () => shell.classList.contains('is-open') ? close() : open());
+  menu.addEventListener('click', (event) => {
+    const option = event.target.closest('.smart-select__option');
+    if (!option) return;
+    select.value = option.dataset.value;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    sync();
+    close();
+    trigger.focus();
+  });
+  trigger.addEventListener('keydown', (event) => {
+    if (!['ArrowDown', 'ArrowUp', 'Enter', ' ', 'Escape'].includes(event.key)) return;
+    event.preventDefault();
+    if (event.key === 'Escape') return close();
+    if (!shell.classList.contains('is-open')) open();
+    const current = Math.max(0, options.findIndex(item => item.classList.contains('is-selected')));
+    const next = event.key === 'ArrowUp' ? Math.max(0, current - 1) : Math.min(options.length - 1, current + 1);
+    options[next].focus();
+  });
+  select.addEventListener('change', sync);
+  document.addEventListener('click', event => { if (!shell.contains(event.target)) close(); });
+  sync();
+}
+
+document.querySelectorAll('select').forEach(enhanceSelect);
 const taxProfile = document.querySelector('#tax-profile');
 const localeByCurrency = { RUB: 'ru-RU', BYN: 'be-BY', KZT: 'kk-KZ', AMD: 'hy-AM', KGS: 'ky-KG', UZS: 'uz-UZ' };
 const supportedCurrencies = ['RUB', 'BYN', 'KZT', 'AMD', 'KGS', 'UZS'];
