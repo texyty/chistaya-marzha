@@ -11,6 +11,7 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
   status,
   headers: { ...cors, 'Content-Type': 'application/json; charset=utf-8' }
 });
+const countrySettings = (raw: string) => { const code=String(raw||'RU').toUpperCase().slice(0,2); const map:any={RU:['RUB','ru_usn_income',6],BY:['BYN','turnover',6],KZ:['KZT','turnover',3],AM:['AMD','turnover',5],KG:['KGS','turnover',4],UZ:['UZS','turnover',4]}; const [base_currency,tax_mode,tax_rate]=map[code]||map.RU; return {base_currency,country_code:map[code]?code:'RU',tax_mode,tax_rate}; };
 
 async function keyFromSecret(secret: string) {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(secret));
@@ -67,6 +68,7 @@ export default { async fetch(request: Request) {
       const seller = await ozon('/v1/seller/info', clientId, apiKey, {});
       const sellerId = String(seller.seller_id || seller.result?.seller_id || clientId);
       const accountName = seller.company_name || seller.name || seller.result?.company_name || `Ozon ${sellerId}`;
+      const settings = countrySettings(seller.country_code || seller.result?.country_code || 'RU');
 
       const { data: existing } = await admin.from('marketplace_accounts').select('id').eq('user_id', user.id).eq('provider', 'ozon').maybeSingle();
       let accountId = existing?.id;
@@ -87,7 +89,7 @@ export default { async fetch(request: Request) {
       });
       if (credentialError) throw credentialError;
       await admin.from('sync_runs').insert({ marketplace_account_id: accountId, user_id: user.id, status: 'completed', records_processed: 1, finished_at: new Date().toISOString() });
-      return json({ ok: true, accountId, accountName });
+      return json({ ok: true, accountId, accountName, settings });
     }
 
     if (input.action === 'sync') {

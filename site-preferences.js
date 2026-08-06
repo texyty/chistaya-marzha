@@ -1,0 +1,14 @@
+(() => {
+  const key = 'cm-cookie-consent-v1';
+  const saved = localStorage.getItem(key);
+  const style = document.createElement('style');
+  style.textContent = `.cookie-panel{position:fixed;z-index:9999;left:50%;bottom:20px;transform:translateX(-50%);width:min(720px,calc(100% - 28px));padding:18px 20px;background:rgba(9,29,20,.96);color:#f7fff9;border:1px solid rgba(184,230,61,.25);border-radius:20px;box-shadow:0 24px 80px rgba(0,0,0,.28);backdrop-filter:blur(18px);display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;font:500 13px/1.5 Manrope,Inter,system-ui,sans-serif}.cookie-panel b{display:block;font-size:15px;margin-bottom:3px}.cookie-panel p{margin:0;color:#c9d8cf}.cookie-actions{display:flex;gap:8px}.cookie-actions button{border:1px solid #446253;border-radius:11px;padding:10px 14px;background:transparent;color:#fff;font:700 12px inherit;cursor:pointer}.cookie-actions .accept{background:#b8e63d;border-color:#b8e63d;color:#092115}.cookie-settings{grid-column:1/-1;display:grid;gap:9px;padding-top:12px;border-top:1px solid #294536}.cookie-settings label{display:flex;align-items:center;justify-content:space-between;gap:20px}.cookie-settings small{color:#9eb3a6}.cookie-settings input{accent-color:#b8e63d}@media(max-width:650px){.cookie-panel{grid-template-columns:1fr}.cookie-actions{width:100%}.cookie-actions button{flex:1}}`;
+  document.head.appendChild(style);
+  if (saved) return;
+  const panel = document.createElement('section'); panel.className = 'cookie-panel'; panel.setAttribute('aria-label','Настройки cookie');
+  panel.innerHTML = `<div><b>Настроим cookie без лишнего шума</b><p>Обязательные cookie нужны для входа и безопасности. Аналитические помогают улучшать отчёты и включаются только с вашего согласия.</p></div><div class="cookie-actions"><button data-settings>Настроить</button><button class="accept" data-accept>Принять</button></div><div class="cookie-settings" hidden><label><span>Обязательные<br><small>Авторизация и настройки кабинета</small></span><input type="checkbox" checked disabled></label><label><span>Аналитические<br><small>Анонимная статистика использования</small></span><input id="analytics-cookie" type="checkbox"></label><div class="cookie-actions"><button data-reject>Только обязательные</button><button class="accept" data-save>Сохранить</button></div></div>`;
+  document.body.appendChild(panel);
+  const save = analytics => { localStorage.setItem(key, JSON.stringify({ necessary:true, analytics, savedAt:new Date().toISOString() })); panel.remove(); window.dispatchEvent(new CustomEvent('cookieconsent',{detail:{analytics}})); };
+  panel.querySelector('[data-settings]').onclick=()=>panel.querySelector('.cookie-settings').hidden=false;
+  panel.querySelector('[data-accept]').onclick=()=>save(true); panel.querySelector('[data-reject]').onclick=()=>save(false); panel.querySelector('[data-save]').onclick=()=>save(panel.querySelector('#analytics-cookie').checked);
+})();

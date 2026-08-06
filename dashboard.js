@@ -1,4 +1,5 @@
-const rub = new Intl.NumberFormat('ru-RU',{style:'currency',currency:'RUB',maximumFractionDigits:0});
+const activeCurrency = localStorage.getItem('cm-currency') || 'RUB';
+const rub = new Intl.NumberFormat('ru-RU',{style:'currency',currency:activeCurrency,maximumFractionDigits:0});
 const number = new Intl.NumberFormat('ru-RU');
 
 function enhanceDashboardSelect(select){
@@ -46,6 +47,8 @@ function render(period=30){
   document.querySelector('#margin').textContent=`${(adjustedProfit/d.revenue*100).toFixed(1).replace('.',',')}%`;
   document.querySelector('#orders').textContent=number.format(d.orders);
   document.querySelector('#returns').textContent=`Возвратов: ${d.returns}`;
+  document.querySelector('#average-check').textContent=rub.format(d.revenue/d.orders);
+  document.querySelector('#cost-share').textContent=`${((d.revenue-adjustedProfit)/d.revenue*100).toFixed(1).replace('.',',')}%`;
   renderChart(period,d.revenue,adjustedProfit);
   renderGoal(adjustedProfit,period);
   renderFunnel(period);
@@ -88,7 +91,7 @@ document.querySelector('#period').addEventListener('change',e=>render(Number(e.t
 document.querySelector('#product-search').addEventListener('input',e=>renderProducts(e.target.value));
 document.querySelector('#risk-only').addEventListener('change',()=>renderProducts());
 const costDialog=document.querySelector('#cost-dialog');
-function openCosts(){document.querySelector('#cost-fields').innerHTML=adjustedProducts().map(p=>`<label><span>${p.name}<small>${p.sku}</small></span><input type="number" min="0" step="1" name="${p.sku}" value="${p.currentCost}"><b>₽ / шт.</b></label>`).join('');costDialog.showModal()}
+function openCosts(){document.querySelector('#cost-fields').innerHTML=adjustedProducts().map(p=>`<label><span>${p.name}<small>${p.sku}</small></span><input type="number" min="0" step="1" name="${p.sku}" value="${p.currentCost}"><b>${activeCurrency} / шт.</b></label>`).join('');costDialog.showModal()}
 document.querySelector('#cost-button').addEventListener('click',openCosts);
 document.querySelector('#cost-close').addEventListener('click',()=>costDialog.close());
 document.querySelector('#cost-reset').addEventListener('click',()=>{localStorage.removeItem('dashboard-costs');costDialog.close();render(currentPeriod);renderExpenses();renderProducts()});

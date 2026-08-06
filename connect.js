@@ -28,8 +28,9 @@ form.addEventListener('submit', async (event) => {
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.error || 'Ozon не подтвердил доступ. Проверьте Client ID и ключ.');
+    if (result.settings) { await client.from('profiles').update({ ...result.settings, updated_at: new Date().toISOString() }).eq('id', session.user.id); localStorage.setItem('cm-currency', result.settings.base_currency); }
     apiKey.value = '';
-    showMessage(`Магазин «${result.accountName || 'Ozon'}» подключён. Запускаем первую синхронизацию.`, 'success');
+    showMessage(`Магазин «${result.accountName || 'Ozon'}» подключён. Валюта и налоги настроены автоматически.`, 'success');
     setTimeout(() => { location.href = 'account.html#connections'; }, 1500);
   } catch (error) {
     showMessage(error.message || 'Не удалось подключить магазин.', 'error');

@@ -9,7 +9,7 @@
   <link rel="canonical" href="https://texyty.github.io/chistaya-marzha/dashboard.html">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="dashboard.css?v=3">
-  <link rel="stylesheet" href="dashboard-overrides.css?v=5">
+  <link rel="stylesheet" href="dashboard-overrides.css?v=6">
 </head>
 <body>
   <aside class="sidebar">
@@ -41,6 +41,8 @@
       <article><span>Чистая прибыль</span><strong id="profit">—</strong><small class="up">↑ 8,1% к прошлому периоду</small></article>
       <article><span>Маржинальность</span><strong id="margin">—</strong><small>Цель: выше 15%</small></article>
       <article><span>Заказы</span><strong id="orders">—</strong><small id="returns">—</small></article>
+      <article><span>Средний чек</span><strong id="average-check">—</strong><small>Выручка на заказ</small></article>
+      <article><span>Доля расходов</span><strong id="cost-share">—</strong><small>От выручки магазина</small></article>
     </section>
 
     <section class="operations-grid" id="plan">
@@ -105,5 +107,5 @@
     <label class="goal-input"><span>Цель на месяц</span><input id="goal-input" type="number" min="1000" step="1000"><b>₽</b></label>
     <div class="dialog-actions"><button id="goal-cancel">Отмена</button><button class="connect" id="goal-save">Сохранить цель</button></div>
   </dialog>
-  <script src="dashboard.js?v=5"></script>
+  <script src="site-preferences.js?v=1"></script><script src="dashboard.js?v=6"></script>
 </body></html>
